@@ -1,0 +1,65 @@
+<html>
+<head>
+<title>::::::::: FOBU 관리자페이지 입니다 :::::::::</title>
+<meta http-equiv="Content-Type" content="text/html; charset=euc-kr">
+<link href="css/css.css" rel="stylesheet" type="text/css">
+<script language=javascript>
+<!--
+function on(){document.regform.id.focus();}
+function login() 
+{
+
+if(document.regform.id.value=="")
+	{
+		alert("[아이디]를 입력해 주세요.");
+		document.regform.id.focus();
+		return;
+	}
+	
+	if(document.regform.pw.value=="")
+	{
+		alert("[비밀번호]를 입력해 주세요.");
+		document.regform.pw.focus();
+		return;
+	}
+document.regform.submit();
+}
+
+function reset()
+{
+	document.regform.reset();
+}
+</script>
+</head>
+<body onLoad="on();">
+<table width="100%" height="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td>
+			<table width="100%" height="405" border="0" cellpadding="0" cellspacing="0">
+				<tr>
+					<td align="center">
+						<table width="866" border="0" cellspacing="0" cellpadding="0">
+					 		 <tr>
+								<td height="361" valign="top" background="images/login_bg.gif" style="padding:228px 10px 10px 305px">
+						          <table border="0" cellspacing="0" cellpadding="0">
+										<form method="post" action="/member/process.php" name="regform">
+										<input type="hidden" name="member_log" value="login"> 
+										
+										<tr>
+										    <td width="165" height="26"><input type="text" name="id" size='23' tabindex="1"></td>
+											<td width="180" height="26"><input type="password" name="pw" size='23' tabindex="2"></td>
+										    <td><input type="image" src="images/button/login_button01.gif" border="0" onClick="login(); return false;" style="border:0"></a></td>
+										</tr>
+										</form>
+									</table>
+						</td>
+						  </tr>
+						</table>
+				  </td>
+			  </tr>
+			</table>
+		</td>
+	</tr>
+</table>
+</body>
+</html>

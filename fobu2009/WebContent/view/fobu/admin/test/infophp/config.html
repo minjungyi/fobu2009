@@ -1,0 +1,19 @@
+<?
+/* 이미지 관련 설정 */
+$img_route = "../../../imagebabyemart/public_html";	// 이미지저장 경로
+$img_view = "http://image.babyemart.co.kr";	// 이미지보기 경로
+$sitedownload_dir = "$img_route/sdata/Bimg";	// 원본이미지 폴더
+$optdownload_dir = "$img_route/sdata/Optimg";	// 옵션이미지 폴더
+$smallimg_dir = "$img_route/sdata/Simg";	// 작은이미지 폴더
+$img_review="../img_viewer.htm";		// viewer
+$global_now_time = date("Y-m-d H:i:s");		// 현재시간
+$global_now_day = date("Y-m-d");		// 현재날짜
+
+if($_SESSION[COM_ID] == "babyemart") {
+	$SENDTEL = "07041349253";
+} else if($_SESSION[COM_ID] == "newsun") {
+	$SENDTEL = "07075594645";
+}
+
+$site_not_view = "28,29,30,31,33,34,35,42,97,98";
+?>

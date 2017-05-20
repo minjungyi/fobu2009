@@ -1,0 +1,8 @@
+<?    
+$FINConf[host]="localhost";
+$FINConf[database]="financedb";
+$FINConf[user]="finance";
+$FINConf[passwd]="finance0101";
+$finconnect=@mysql_connect($FINConf[host],$FINConf[user],$FINConf[passwd]);
+$fin_mysql = mysql_select_db($FINConf[database],$finconnect);
+?>

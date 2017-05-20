@@ -1,0 +1,1256 @@
+<?
+function redirect($url, $sec) {
+	echo "<meta http-equiv='refresh' content='$sec; URL=$url'>";
+}
+
+function msgdirect ($msg, $url) {
+	echo"
+	<Script Language='JavaScript'>
+		alert('$msg');
+		location.href='$url';
+	</Script>
+	";
+}
+
+function loginchk() {
+	GLOBAL $SERVER_NAME;
+	GLOBAL $REQUEST_URI;
+
+	$RETURN_URL = "http://" . $SERVER_NAME . $REQUEST_URI ;
+
+	if($_SESSION[ID] == "") {
+	echo"
+	<Script Language='JavaScript'>
+		alert('세션이 종료되었습니다.\\n\\n관리자 로그인을 해주세요.');
+		location.href='/index.php?login_url=$RETURN_URL';
+	</Script>
+	";
+	}
+}
+
+function left_menu($top, $left) {
+	GLOBAL $table;
+	GLOBAL $SERVER_NAME;
+	GLOBAL $REQUEST_URI;
+	GLOBAL $mysql;
+
+	$RETURN_URL = "http://" . $SERVER_NAME . $REQUEST_URI ;
+	
+	$TCOLUMN = "popwin";
+	$TWHERE = "uid='$top' AND seq='$left'";
+	$Trow = $mysql -> get_one($table[submenu_config], $TCOLUMN, $TWHERE);
+
+	if($_SESSION[ID] == "") {
+		if($Trow[popwin] != "") {
+			echo"
+			<Script Language='JavaScript'>
+				alert('관리자로그인을 해주시기 바랍니다.');
+				window.close();
+			</Script>
+			";
+			exit;
+		} else {
+			echo"
+			<Script Language='JavaScript'>
+				alert('관리자로그인을 해주시기 바랍니다.');
+				location.href='/index.php?login_url=$RETURN_URL';
+			</Script>
+			";
+			exit;
+		}
+	}
+	
+	$COLUMN = "stat";
+	$WHERE = "id='$_SESSION[ID]' AND lev_code='$top' AND sub_code='$left'";
+	$Row = $mysql -> get_one($table[submenu_permission], $COLUMN, $WHERE);
+	if($Row[stat] != "Y") {
+		if($Trow[popwin] != "") {
+			echo"
+			<Script Language='JavaScript'>
+				alert('페이지를 열람할 수 있는 권한이 없습니다.');
+				window.close();
+			</Script>
+			";
+			exit;
+		} else {
+			echo"
+			<Script Language='JavaScript'>
+				alert('페이지를 열람할 수 있는 권한이 없습니다.');
+				history.go(-1);
+			</Script>
+			";
+			exit;
+		}
+	}
+	$val = array($top,$left);
+	return $val;
+}
+
+// ============================== 한글 문자 추출 함수
+function kr_leftstr($str, $len, $trail, $using) {
+
+   $flag = false; // true = 한글의 시작문자
+   $len--;
+
+   if ($using) $len -= strlen($trail);
+
+   for($i=0; $i<$len; $i++) {
+      $j = ord($str[$i]); // character의 ASCII 값을 구한다.
+
+      if($j > 160 && $j < 255) {
+         $flag = ($flag) ? false : true;
+         // 이미 한글시작문자가 on 되었다면
+         // 한글시작문자가 아니므로 flag 를 off함
+         // 아니면 한글 시작문자로 flag를 set
+      }
+      else {
+         $flag = false;
+         // 127 보다 작으면 무조건 한글시작이 아님
+      }
+   }
+
+   // true = 한글의 시작문자
+   if ($len>0) $str = ($flag) ? substr($str, 0, $len+1) : substr($str, 0, $len);
+   else $str = "";
+
+   if ($using) $str = $str . $trail;
+   return $str;
+}
+
+// 글 제목 자르기 !! 문자열의 한글 아스키값이 짝수, 홀수일 때에 따라서 1씩 다르게 자른다.
+function cut_str($str, $length) {
+	if(strlen($str) > $length) {
+		$count = 0;
+		for($i = 0; $i < $length ; $i++) { 
+			$cut = ord(substr($str, $i, 1)); 
+			if($cut > 127) { 
+				$count++; 
+			} 
+		}
+		$mod = $count % 2; 
+		if($mod == 0) {		
+			$str = substr($str, 0, $length); 
+			$str = $str . ".."; 
+		} else { 
+			$length = $length + 1; 
+			$str = substr($str, 0, $length); 
+			$str = $str . ".."; 
+		} 
+	} 
+	return $str;
+}
+
+function popup($msg) {
+	echo"
+	<Script Language='JavaScript'>
+		alert('$msg');
+	</Script>";
+}
+
+function popupBack($msg) {
+	echo"
+	<Script Language='JavaScript'>
+		alert('$msg');
+		history.back();
+	</Script>";
+}
+
+function popupClose($msg) {
+	echo"
+	<Script Language='JavaScript'>
+		alert('$msg');
+		self.close;
+	</Script>";
+}
+
+function page_nav($total,$scale,$p_num,$page,$query)
+        {
+                global $PHP_SELF;
+
+                @$total_page = ceil($total/$scale);
+                if (!$page) $page = 1;
+                $page_list = ceil($page/$p_num)-1;
+                
+                // 페이지 리스트의 첫번째가 아닌 경우엔 [1]...[prev] 버튼을 생성한다.
+                if ($page_list>0) 
+                {
+                        $navigation = "<a href='$PHP_SELF?page=1&$query'>[1]</a> ... ";
+                        $prev_page = ($page_list-1)*$p_num+1;
+                        $navigation .= "<a href='$PHP_SELF?page=$prev_page&$query'>[prev]</a> ";
+                }
+
+                // 페이지 목록 가운데 부분 출력
+                $page_end=($page_list+1)*$p_num;
+                if ($page_end>$total_page) $page_end=$total_page;
+
+                for ($setpage=$page_list*$p_num+1;$setpage<=$page_end;$setpage++)
+                {
+                        if ($setpage==$page) {
+                                $navigation .= "<b>[$setpage]</b> ";
+                        } else {
+                                $navigation .= "<a href='$PHP_SELF?page=$setpage&$query'>[$setpage]</a> ";
+                        }
+                }
+
+                // 페이지 목록 맨 끝이 $total_page 보다 작을 경우에만, [next]...[$total_page] 버튼을 생성한다.
+                if ($page_end<$total_page) 
+                {
+                        $next_page = ($page_list+1)*$p_num+1;
+                        $navigation .= "<a href='$PHP_SELF?page=$next_page&$query'>[next]</a> ";
+                        $navigation .= "... <a href='$PHP_SELF?page=$total_page&$query'>[$total_page]</a>";
+                }
+        
+                return $navigation;
+        }
+
+function icon_page_nav($total,$scale,$p_num,$page,$query)
+        {
+                global $PHP_SELF;
+
+                @$total_page = ceil($total/$scale);
+                if (!$page) $page = 1;
+                $page_list = ceil($page/$p_num)-1;
+                
+                // 페이지 리스트의 첫번째가 아닌 경우엔 [1]...[prev] 버튼을 생성한다.
+                if ($page_list>0) 
+                {
+                        $navigation = "<a href='$PHP_SELF?page=1&$query'><img src='/images/con_img/tn1.gif' border='0' align='absmiddle'></a> ... ";
+                        $prev_page = ($page_list-1)*$p_num+1;
+                        $navigation .= "<a href='$PHP_SELF?page=$prev_page&$query'>[prev]</a> ";
+                }
+
+                // 페이지 목록 가운데 부분 출력
+                $page_end=($page_list+1)*$p_num;
+                if ($page_end>$total_page) $page_end=$total_page;
+
+                for ($setpage=$page_list*$p_num+1;$setpage<=$page_end;$setpage++)
+                {
+		$on_page_img = "<img src='/images/con_img/tn$setpage.gif' border='0' align='absmiddle'>";
+		$off_page_img = "<img src='/images/con_img/no$setpage.gif' border='0' align='absmiddle'>";
+                        if ($setpage==$page) {
+                                $navigation .= "$on_page_img ";
+                        } else {
+                                $navigation .= "<a href='$PHP_SELF?page=$setpage&$query'>$off_page_img</a> ";
+                        }
+                }
+
+                // 페이지 목록 맨 끝이 $total_page 보다 작을 경우에만, [next]...[$total_page] 버튼을 생성한다.
+                if ($page_end<$total_page) 
+                {
+		$total_page_img = "<img src='/images/con_img/no$total_page.gif' border='0' align='absmiddle'>";
+                        $next_page = ($page_list+1)*$p_num+1;
+                        $navigation .= "<a href='$PHP_SELF?page=$next_page&$query'>[next]</a> ";
+                        $navigation .= "... <a href='$PHP_SELF?page=$total_page&$query'>$total_page_img</a>";
+                }
+        
+                return $navigation;
+        }
+
+function string_chk ($string, $chk_string) {
+
+    for ($i = 0; $i < strlen ($chk_string); $i++) {
+
+        $chk_char = substr ($chk_string, $i, 1) ;
+        $chk_ascii[$i] = ord ($chk_char) ;
+
+        for ($j = 0; $j <strlen ($string); $j++) {
+            $str_char = substr ($string, $j, 1) ;
+            $str_ascii[$j] = ord ($str_char) ;
+
+            if ($chk_ascii[$i] == $str_ascii[$j]) {
+                $str_diff[$i] = "OK" ;
+                break;
+            }
+        }
+
+        if ($str_diff[$i] != "OK") {
+            return FALSE ;
+            break ;
+        }
+    }
+    return TRUE ;
+
+}
+
+function kr_explode ($len, $string) {
+
+	$tmp_str = "" ;
+	$tmp_str_arnum = 0 ;
+	$tmp_loop_num = 0 ;
+	for ($i = 0; $i < strlen($string); $i++) {
+		if ($tmp_loop_num >= $len) {
+			$tmp_str_arnum++ ;
+			$tmp_loop_num = 0 ;
+		}
+		if (ord(substr($string, $i, 1)) > 160 && ord(substr($string, $i, 1)) < 255) {
+			$tmp_str["$tmp_str_arnum"] .= substr($string, $i, 2) ;
+			$tmp_loop_num += 2 ;
+			$i++ ;
+		} else {
+			$tmp_str["$tmp_str_arnum"] .= substr($string, $i, 1) ;
+			$tmp_loop_num++ ;
+		}
+	}
+
+	return $tmp_str ;
+	
+}
+
+function introdset ($nval, $irval = "1", $irtpy = "0") {
+
+// $nval = 값
+// $irval = 자릿수 (ex, 1 : 1단위, 10 : 10단위, 100 : 100 단위)
+// $irtpy = 변환 타입 (0 : 반올림, 1 : 내림, 2 : 올림)
+
+	if ((strlen ($nval)) < (strlen ($irval))) {
+
+		return $nval ;
+
+	} else {
+
+		$nval = intval ($nval) ;
+		$nval_sfx = substr ($nval, -(strlen ($irval))) ;
+		$nval_pfx = substr ($nval, 0, (((strlen ($nval)) - (strlen ($irval))))) ;
+		$nval_real = substr ($nval_sfx, 0, 1) ;
+
+		switch ($irtpy) {
+			case "0" :	// 반올림
+				$return_nval = round($nval, -(strlen($irval))) ;
+				break ;
+			case "1" :
+				$N_CHG = (strlen($irval) > 1) ? "0.". str_repeat("0", ((strlen($irval)) - 1)) . "1" : "0.1" ;
+				$return_nval = floor(($nval * $N_CHG)) * ("1" . str_repeat("0", (strlen($irval)))) ;
+				break ;
+			case "2" :
+				$N_CHG = (strlen($irval) > 1) ? "0.". str_repeat("0", ((strlen($irval)) - 1)) . "1" : "0.1" ;
+				$return_nval = ceil(($nval * $N_CHG)) * ("1" . str_repeat("0", (strlen($irval)))) ;
+				break ;
+		}
+
+		return $return_nval ;
+
+	}
+
+}
+
+function price2str ($i_val) {
+
+	$i_len = strlen ($i_val) ;
+
+	$real_val = "" ;
+	$mirror_val = "" ;
+	$cut_s = 1 ;
+	$cut_s_dan = 1 ;
+
+	for ($i = $i_len; $i > 0; $i--) {
+		$mirror_val .= substr ($i_val, ($i - 1), 1) ;
+	}
+
+	for ($i = 0; $i < $i_len; $i++) {
+		$p_val = substr ($mirror_val, $i, 1) ;
+		$p_str = "" ;
+		$p_str_suf = "" ;
+		$p_str_dan = "" ;
+
+		switch ($p_val) {
+			case "1" :
+				$p_str = "일" ;
+				break ;
+			case "2" :
+				$p_str = "이" ;
+				break ;
+			case "3" :
+				$p_str = "삼" ;
+				break ;
+			case "4" :
+				$p_str = "사" ;
+				break ;
+			case "5" :
+				$p_str = "오" ;
+				break ;
+			case "6" :
+				$p_str = "육" ;
+				break ;
+			case "7" :
+				$p_str = "칠" ;
+				break ;
+			case "8" :
+				$p_str = "팔" ;
+				break ;
+			case "9" :
+				$p_str = "구" ;
+				break ;
+			case "0" :
+				$p_str = "" ;
+				break ;
+		}
+
+		if ($cut_s == 0) {
+			switch ($cut_s_dan) {
+				case "2" :
+					$p_str_dan = "만" ;
+					break ;
+				case "3" :
+					$p_str_dan = "억" ;
+					break ;
+				case "4" :
+					$p_str_dan = "조" ;
+					break ;
+				case "5" :
+					$p_str_dan = "경" ;
+					break ;
+				default :
+					break ;
+			}
+			$cut_s++ ;
+		}
+
+		if ($p_str == "") {
+			$p_str_suf = "" ;
+		} else {
+			switch ($cut_s) {
+				case "2" :
+					$p_str_suf = "십" ;
+					break ;
+				case "3" :
+					$p_str_suf = "백" ;
+					break ;
+				case "4" :
+					$p_str_suf = "천" ;
+					break ;
+				default :
+					break ;
+			}
+		}
+
+		if ($cut_s == 4) {
+
+			$cut_s_dan++ ;
+			$cut_s = 0 ;
+
+		} else {
+			$cut_s++ ;
+		}
+
+		$real_val = $p_str . $p_str_suf . $p_str_dan . $real_val ;
+	}
+
+	return $real_val ;
+
+}
+
+function price_vat ($price) {
+	$vat = ($price)/1.1;
+	$round = explode(".",$vat);
+	$round = $round[0];
+
+	$vat_val = ($price)-$round;
+	return $vat_val ;
+}
+
+function price_supply ($price) {
+	$vat = ($price)/1.1;
+	$round = explode(".",$vat);
+	$round = $round[0];
+	
+	return $round;
+}
+
+
+
+function prod_prc_base($pid = "N") {
+// 디어비즈용 원가 출력 함수
+// $pid = 제품 seq
+
+	GLOBAL $table ;
+	GLOBAL $connect ;
+
+	if ($pid == "N") {
+		return "ERROR!!" ;
+	} else {
+
+		$prod_data = mysql_fetch_array(mysql_query("select a.base_price base_price, p.dear_price dear_price from ". $table["product2"] ." as a, ". $table["product_price"] ." as p where a.seq = p.seq AND a.seq = '". $pid ."'")) ;
+
+		if ($prod_data["dear_price"] > 0) {
+			$prod_data["base_price"] = intval($prod_data["base_price"] + ($prod_data["base_price"] * $prod_data["dear_price"] / 100)) ;
+		}
+
+		$prod_data["base_price"] = introdset(intval($prod_data["base_price"] + ($prod_data["base_price"] * 1 / 100)), 10, 2) ;
+
+		return $prod_data["base_price"] ;
+		echo $prod_data["base_price"] ;
+	}
+}
+
+function prod_prc_order($pid = "N", $dealer_val = "0") {
+// 디어비즈용 판매가 출력 함수
+// $pid = 제품 seq
+// $dealer_val = 딜러가 할인율 (ex: 3.5 = 3.5%)
+
+	GLOBAL $table ;
+	GLOBAL $connect ;
+
+	if ($pid == "N") {
+
+		return "ERROR!!" ;
+
+	} else {
+
+		$prod_data = mysql_fetch_array(mysql_query("select a.cate cate, a.cate1 cate1, a.cate2 cate2, a.cate3 cate3, a.price price, p.cpn_price cpn_price, p.dealer_price dealer_price from ". $table["product2"] ." as a, ". $table["product_price"] ." as p where a.seq = p.seq AND a.seq = '". $pid ."'")) ;
+
+		$coupon_use = "N" ;
+		$coupon_val = "" ;
+
+		if ($prod_data["cpn_price"] > "0") {
+
+			$coupon_use = "Y" ;
+
+		} else {
+
+			$cpn_cate = $prod_data["cate"] ;
+			$cpn_cate1 = $prod_data["cate1"] ;
+			$cpn_cate2 = $prod_data["cate2"] ;
+			$cpn_cate3 = $prod_data["cate3"] ;
+			$cpn_pid = $pid ;
+
+			$cpn_cate_result = mysql_query ("select seq, cate2, cate3, pid, cpnval from ". $table["product_cpn"] ." where cate = \"". $cpn_cate ."\" AND cate1 = \"". $cpn_cate1 ."\"") ;
+
+			if (mysql_num_rows($cpn_cate_result) > 0) {
+
+				$set_depth = 0 ;
+
+				while ($cpn_row = mysql_fetch_array ($cpn_cate_result)) {
+
+					$cpn_depth = 0 ;
+
+					if ($cpn_row["cate2"] != "") {
+						if ($cpn_cate2 == $cpn_row["cate2"]) {
+							if ($cpn_row["cate3"] != "") {
+								if ($cpn_cate3 == $cpn_row["cate3"]) {
+									if ($cpn_row["pid"] != "") {
+										if ($cpn_pid == $cpn_row["pid"]) {
+											$cpn_depth = 4 ;
+										} else {
+											continue ;
+										}
+									} else {
+										$cpn_depth = 3 ;
+									}
+								} else {
+									continue ;
+								}
+							} else {
+								$cpn_depth = 2 ;
+							}
+						} else {
+							continue ;
+						}
+					} else {
+						$cpn_depth = 1 ;
+					}
+
+					if ($set_depth < $cpn_depth) {
+						if ($cpn_row["cpnval"] == "0") {
+							$coupon_use = "N" ;
+							$coupon_val = 0 ;
+							$cpnsq = $cpn_row["seq"] ;
+							$set_depth = $cpn_depth ;
+						} else {
+							$coupon_use = "Y" ;
+							$coupon_val = $cpn_row["cpnval"] ;
+							$cpnsq = $cpn_row["seq"] ;
+							$set_depth = $cpn_depth ;
+						}
+					}
+				}
+			}
+
+			if ($coupon_use == "Y") {
+				$prod_data["cpn_price"] = introdset(($prod_data["price"] - (intval ($prod_data["price"] * ($coupon_val / 100)))), 10, 1) ;
+			}
+
+		}
+
+		if ($prod_data["dealer_price"] <= 0) {
+			$prod_data["dealer_price"] = intval($prod_data["price"] - ($prod_data["price"] * $dealer_val / 100)) ;
+		}
+
+		if ($coupon_use == "Y") {
+			$prod_data["price"] = ($prod_data["cpn_price"] < $prod_data["dealer_price"]) ? $prod_data["cpn_price"] : $prod_data["dealer_price"] ;
+		} else {
+			$prod_data["price"] = $prod_data["dealer_price"] ;
+		}
+
+		$prod_data["price"] = (introdset($prod_data["price"], 10, 2)) - 100 ;
+
+		return $prod_data["price"] ;
+
+	}
+
+}
+
+function prod_callpoint($prod_pc, $prod_bc, $cp_val) {
+// 제품 콜포인트 출력 함수
+// $prod_pc = 제품 판매가
+// $prod_bc = 제품 원가
+// $cp_val = 콜포인트 적용율 (ex : 16.7 = 16.7%)
+
+	if (($prod_pc - $prod_bc) <= 0) {
+		$callpoint = 0 ;
+	} else {
+		$callpoint = introdset((intval(($prod_pc - $prod_bc) / 2)), 1, 1) ;
+		$callpoint = introdset(intval($callpoint * $cp_val / 100), 1, 1) ;
+	}
+
+	return $callpoint ;
+
+}
+
+function com_prc_base($comid = "N") {
+// 완제품(젠큐브) 원가 출력용 함수
+// $comid = 젠큐브 seq
+
+	GLOBAL $table ;
+	GLOBAL $connect ;
+
+	if ($pid == "N") {
+		return "ERROR!!" ;
+	} else {
+
+		$prod_data = mysql_fetch_array(mysql_query("select base_price from ". $table["com_product"] ." where seq = '". $comid ."'")) ;
+
+		$prod_data["base_price"] = introdset(intval($prod_data["base_price"] + ($prod_data["base_price"] * 1 / 100)), 10, 2) ;
+
+		return $prod_data["base_price"] ;
+	}
+}
+
+function com_prc_order($pid = "N", $dealer_val = "0") {
+// 완제품(젠큐브) 판매가 출력용 함수
+// $pid = 젠큐브 seq
+// $dealer_val = 딜러 할인율
+
+	GLOBAL $table ;
+	GLOBAL $connect ;
+
+	if ($pid == "N") {
+
+		return "ERROR!!" ;
+
+	} else {
+
+		$prod_data = mysql_fetch_array(mysql_query("select price, base_price from ". $table["com_product"] ." where seq = '". $pid ."'")) ;
+
+		return $prod_data["price"] ;
+
+	}
+
+}
+
+function com_callpoint($prod_pc, $prod_bc, $cp_val) {
+// 완제품 콜포인트 출력용 함수
+// $prod_pc = 판매가
+// $prod_bc = 원가
+// $cp_val = 콜포인트 적용율 (ex : 16.7 = 16.7%) ;
+
+	if (($prod_pc - $prod_bc) <= 0) {
+		$callpoint = 0 ;
+	} else {
+		$callpoint = introdset((intval(($prod_pc - $prod_bc) / 2)), 1, 1) ;
+		$callpoint = introdset(intval($callpoint * $cp_val / 100), 1, 1) ;
+	}
+
+	return $callpoint ;
+
+}
+
+function prod_calcprice($prod_pc = 0, $prod_bc = 0, $prod_qty = 1) {
+// 제품 정산가 출력용 함수
+// $prod_pc = 제품 판매가
+// $prod_bc = 제품 원가
+// $prod_qty = 제품 수량
+
+	if ($prod_bc >= $prod_pc) {
+		$calc_price = $prod_pc + $prod_qty ;
+	} else {
+		$calc_price = ((intval(($prod_pc - $prod_bc) / 2)) + $prod_bc) * $prod_qty ;
+	}
+
+	return $calc_price ;
+
+}
+
+function ord_calcprice($ord_prc, $calc_prc) {
+
+	if ($ord_prc <= $calc_prc) {
+		$calc_price = $ord_prc ;
+	} else {
+
+		$calc_price = introdset($calc_prc, 10) ;
+
+		if ($ord_prc > $calc_price) {
+			$calc_price = $calc_price + 100 ;
+		}
+
+	}
+
+	return $calc_price ;
+
+}
+
+
+function prod_dealer_prc($PRDTYP, $PRDSQ) {
+
+// $PRDTYP : Z = 젠큐브, P = 단품
+// $PRDSQ : 제품번호
+	GLOBAL $table, $connect ;
+
+	if ($PRDTYP == "P") {
+
+		$prod_info_res = mysql_query("select cate, cate1, cate2, cate3, price, base_price from ". $table['product'] ." where seq = ". $PRDSQ, $connect) ;
+
+		$prod_chk = @mysql_num_rows($prod_info_res) ;
+		if ($prod_chk > 0) {
+			$prod_info = mysql_fetch_array($prod_info_res) ;
+
+			$dpc_cate = $prod_info['cate'] ;
+			$dpc_cate1 = $prod_info['cate1'] ;
+			$dpc_cate2 = $prod_info['cate2'] ;
+			$dpc_cate3 = $prod_info['cate3'] ;
+			$dpc_pid = $PRDSQ ;
+
+			$dpcconf_df_res = mysql_query("select seq, cate, cate1, cate2, cate3, pid, prc_base, ovclass, ovval, ovtype, ovpos, ovrod from JT_dealer_config where cate = '' AND cate1 = ''", $connect) ;
+			if (mysql_num_rows($dpcconf_df_res) > 0) {
+				$dpcconf_df = mysql_fetch_array($dpcconf_df_res) ;
+
+				$dfconf_prc_base = $dpcconf_df['prc_base'] ;
+				$dfconf_ovclass = $dpcconf_df['ovclass'] ;
+				$dfconf_ovval = $dpcconf_df['ovval'] ;
+				$dfconf_ovtype = $dpcconf_df['ovtype'] ;
+				$dfconf_ovpos = $dpcconf_df['ovpos'] ;
+				$dfconf_ovrod = $dpcconf_df['ovrod'] ;
+			} else {
+
+				$dfconf_prc_base = "P" ;
+				$dfconf_ovclass = "P" ;
+				$dfconf_ovval = "3" ;
+				$dfconf_ovtype = "D" ;
+				$dfconf_ovpos = "100" ;
+				$dfconf_ovrod = "2" ;
+
+			}
+
+			$dpcconf_res = mysql_query("select seq, cate, cate1, cate2, cate3, pid, prc_base, ovclass, ovval, ovtype, ovpos, ovrod from JT_dealer_config where cate = '". $dpc_cate ."'", $connect) ;
+
+			if (mysql_num_rows($dpcconf_res) > 0) {
+
+				$conf_depth = 0 ;
+
+				$conf_prc_base = $dpcconf_df['prc_base'] ;
+				$conf_ovclass = $dpcconf_df['ovclass'] ;
+				$conf_ovval = $dpcconf_df['ovval'] ;
+				$conf_ovtype = $dpcconf_df['ovtype'] ;
+				$conf_ovpos = $dpcconf_df['ovpos'] ;
+				$conf_ovrod = $dpcconf_df['ovrod'] ;
+
+				while ($dpcconf = mysql_fetch_array($dpcconf_res)) {
+
+					$data_depth = 0 ;
+					if ($dpcconf['pid'] == "") {
+						if ($dpcconf['cate3'] == "") {
+							if ($dpcconf['cate2'] == "") {
+								if ($dpcconf['cate1'] == "") {
+									$data_depth = 1 ;
+								} else {
+									if ($dpc_cate1 == $dpcconf['cate1']) {
+										$data_depth = 2 ;
+									} else {
+										continue ;
+									}
+								}
+							} else {
+								if ($dpc_cate2 == $dpcconf['cate2']) {
+									$data_depth = 3 ;
+								} else {
+									continue ;
+								}
+							}
+						} else {
+							if ($dpc_cate3 == $dpcconf['cate3']) {
+								$data_depth = 4 ;
+							} else {
+								continue ;
+							}
+						}
+					} else {
+						if ($dpc_pid == $dpcconf['pid']) {
+							$data_depth = 5 ;
+						} else {
+							continue ;
+						}
+					}
+
+					if ($conf_depth < $data_depth) {
+
+						$conf_depth = $data_depth ;
+
+						$conf_prc_base = $dpcconf['prc_base'] ;
+						$conf_ovclass = $dpcconf['ovclass'] ;
+						$conf_ovval = $dpcconf['ovval'] ;
+						$conf_ovtype = $dpcconf['ovtype'] ;
+						$conf_ovpos = $dpcconf['ovpos'] ;
+						$conf_ovrod = $dpcconf['ovrod'] ;
+
+					}
+				}
+			} else {
+
+				$conf_prc_base = $dpcconf_df['prc_base'] ;
+				$conf_ovclass = $dpcconf_df['ovclass'] ;
+				$conf_ovval = $dpcconf_df['ovval'] ;
+				$conf_ovtype = $dpcconf_df['ovtype'] ;
+				$conf_ovpos = $dpcconf_df['ovpos'] ;
+				$conf_ovrod = $dpcconf_df['ovrod'] ;
+
+			}
+
+			switch ($conf_prc_base) {
+				case "P" :	// 판매가
+					$prod_off_price = $prod_info['price'] ;
+					switch ($conf_ovclass) {
+						case "P" :
+							switch ($conf_ovtype) {
+								case "D" :
+									$PRD_PRICE = $prod_off_price - ($prod_off_price * $conf_ovval / 100) ;
+									break ;
+								case "A" :
+									$PRD_PRICE = $prod_off_price + ($prod_off_price * $conf_ovval / 100) ;
+									break ;
+								default :
+									$PRD_PRICE = $prod_info['price'] ;
+									break ;
+							}
+							break ;
+						case "F" :
+							switch ($conf_ovtype) {
+								case "D" :
+									$PRD_PRICE = $prod_off_price - $conf_ovval ;
+									break ;
+								case "A" :
+									$PRD_PRICE = $prod_off_price + $conf_ovval ;
+									break ;
+								default :
+									$PRD_PRICE = $prod_info['price'] ;
+									break ;
+							}
+							break ;
+						default :
+							$PRD_PRICE = $prod_info['price'] ;
+							break ;
+					}
+					break ;
+				case "B" :	// 공급가
+					$prod_off_price = $prod_info['base_price'] ;
+					switch ($conf_ovclass) {
+						case "P" :
+							switch ($conf_ovtype) {
+								case "D" :
+									$PRD_PRICE = $prod_off_price - ($prod_off_price * $conf_ovval / 100) ;
+									break ;
+								case "A" :
+									$PRD_PRICE = $prod_off_price + ($prod_off_price * $conf_ovval / 100) ;
+									break ;
+								default :
+									$PRD_PRICE = $prod_info['price'] ;
+									break ;
+							}
+							break ;
+						case "F" :
+							switch ($conf_ovtype) {
+								case "D" :
+									$PRD_PRICE = $prod_off_price - $conf_ovval ;
+									break ;
+								case "A" :
+									$PRD_PRICE = $prod_off_price + $conf_ovval ;
+									break ;
+								default :
+									$PRD_PRICE = $prod_info['price'] ;
+									break ;
+							}
+							break ;
+						default :
+							$PRD_PRICE = $prod_info['price'] ;
+							break ;
+					}
+					break ;
+				default :
+					$PRD_PRICE = $prod_info['price'] ;
+					break ;
+			}
+
+			$PRD_PRICE = introdset(intval($PRD_PRICE), $conf_ovpos, $conf_ovrod) ;
+
+			if ($PRD_PRICE < $prod_info['base_price']) {
+				$PRD_PRICE = $prod_info['base_price'] ;
+			}
+
+		} else {
+			$PRD_PRICE = 0 ;
+		}
+	}
+
+	RETURN $PRD_PRICE ;
+
+}
+
+function resizeimg($filename, $x, $y, $img_name = "picture") {
+
+// 전송받은 이미지 정보를 받는다
+	$img_info = @getImageSize($filename) ;
+	if ($img_info == "") {
+		if ($x > 70) {
+			$blank_img = "blank_m.gif" ;
+		} else {
+			$blank_img = "blank_s.gif" ;
+		}
+		echo "<img src='/images/$blank_img' border='0' width='". $x ."' height='". $y ."' name='". $img_name ."'>" ;
+	}
+// 이미지 출력
+	if ($x > $img_info[0] and $y > $img_info[1]) {
+		$x = $img_info[0] ;
+		$y = $img_info[1] ;
+	} else {
+		$x_per = $img_info[0] / $x ;
+		$y_per = $img_info[1] / $y ;
+
+		if ($x_per > $y_per ) {
+			$img_per = $x_per ;
+		} else {
+			$img_per = $y_per ;
+		}
+
+		$x = (int)($img_info[0] / $img_per) ;
+		$y = (int)($img_info[1] / $img_per) ;
+	}
+
+	echo "<img src='". $filename ."' border='0' width='". $x ."' height='". $y ."' name='". $img_name ."'>" ;
+}
+
+function prod_coupon_prc($PRDTYP, $PRDSQ) {
+// $PRDTYP : Z = 젠큐브, P = 단품
+// $PRDSQ : 제품번호
+	GLOBAL $table, $connect ;
+
+	$prod_info = mysql_fetch_array(mysql_query("select A.cate, A.cate1, A.cate2, A.cate3, A.base_price, A.price, P.cpn_price from ". $table['product'] ." as A LEFT JOIN ". $table['product_price'] ." as P ON A.seq = P.seq where A.seq = '". $PRDSQ ."'")) ;
+
+	if ($prod_info["cpn_price"] == "0") {
+
+		$cpn_cate = $prod_info["cate"] ;
+		$cpn_cate1 = $prod_info["cate1"] ;
+		$cpn_cate2 = $prod_info["cate2"] ;
+		$cpn_cate3 = $prod_info["cate3"] ;
+		$cpn_pid = $PRDSQ ;
+
+		$coupon_use = "N" ;
+		$coupon_val = "" ;
+
+		$cpn_cate_result = mysql_query("select seq, cate2, cate3, pid, cpnval from ". $table['product_cpn'] ." where cate = '". $cpn_cate."' AND cate1 = '".$cpn_cate1."'") ;
+
+		if (mysql_num_rows ($cpn_cate_result) > 0) {
+			$set_depth = 0 ;
+			while ($cpn_row = mysql_fetch_array ($cpn_cate_result)) {
+				$cpn_depth = 0 ;
+				if ($cpn_row['cate2'] != "") {
+					if ($cpn_cate2 == $cpn_row['cate2']) {
+						if ($cpn_row['cate3'] != "") {
+							if ($cpn_cate3 == $cpn_row['cate3']) {
+								if ($cpn_row['pid'] != "") {
+									if ($cpn_pid == $cpn_row['pid']) {
+										$cpn_depth = 4 ;
+									} else {
+										continue ;
+									}
+								} else {
+									$cpn_depth = 3 ;
+								}
+							} else {
+								continue ;
+							}
+						} else {
+							$cpn_depth = 2 ;
+						}
+					} else {
+						continue ;
+					}
+				} else {
+					$cpn_depth = 1 ;
+				}
+
+				if ($set_depth < $cpn_depth) {
+					if ($cpn_row['cpnval'] == "0") {
+						$coupon_use = "N" ;
+						$coupon_val = 0 ;
+						$cpnsq = $cpn_row['seq'] ;
+						$set_depth = $cpn_depth ;
+					} else {
+						$coupon_use = "Y" ;
+						$coupon_val = $cpn_row['cpnval'] ;
+						$cpnsq = $cpn_row['seq'] ;
+						$set_depth = $cpn_depth ;
+					}
+				}
+			}
+		}
+
+		if ($coupon_use == "Y") {
+			$prod_info['cpn_price'] = introdset(($prod_info['price'] - (intval($prod_info['price'] * ($coupon_val / 100)))), 10, 1) ;
+			if ($prod_info['cpn_price'] < $prod_info['base_price']) {
+				$prod_info['cpn_price'] = $prod_info['base_price'] ;
+			}
+			$RTN_VAL = "Y,". $prod_info['cpn_price'] ;
+		} else {
+			$RTN_VAL = "N,0" ;
+		}
+	} else {
+		if ($prod_info['cpn_price'] < $prod_info['base_price']) {
+			$prod_info['cpn_price'] = $prod_info['base_price'] ;
+		}
+		$RTN_VAL = "Y,". $prod_info['cpn_price'] ;
+	}
+
+	RETURN $RTN_VAL ;
+
+}
+
+function price_return($Pnum, $stat) {
+	GLOBAL $_SERVER, $table, $connect ;
+
+	$Pquery = "SELECT A.base_price, A.price, B.friend_price, A.cate2, A.mileage, A.site FROM ".$table[product]." as A, ".$table[product_price]." as B WHERE A.seq=B.seq AND A.seq='$Pnum'";
+	$Presult = mysql_query($Pquery);
+	$Prow = mysql_fetch_array($Presult);
+	
+	if($Prow[price] >= $Prow[friend_price]) {
+		$default_price = $Prow[price];
+	} else {
+		$default_price = $Prow[friend_price];
+	}
+	
+	if($stat == "Z") {
+		$minus_per_28 = 5;
+		$minus_per_29 = 10;
+		$minus_per_30 = 3;
+		$minus_per_31 = 3;
+		$minus_per_33 = 6;
+		$minus_per_34 = 3;
+		$minus_per_35 = 8;
+		$minus_per_36 = 3;
+		$minus_per_37 = 5;
+		$minus_per_38 = 5;
+		$minus_per_39 = 5;
+		$minus_per_40 = 5;
+		$minus_per_41 = 5;
+		$minus_per_42 = 5;
+		$minus_per_97 = 5;
+		$minus_per_98 = 8;
+	} else {
+		$minus_per_28 = 0;
+		$minus_per_29 = 0;
+		$minus_per_30 = 0;
+		$minus_per_31 = 0;
+		$minus_per_33 = 0;
+		$minus_per_34 = 0;
+		$minus_per_35 = 0;
+		$minus_per_36 = 0;
+		$minus_per_37 = 0;
+		$minus_per_38 = 0;
+		$minus_per_39 = 0;
+		$minus_per_40 = 0;
+		$minus_per_41 = 0;
+		$minus_per_42 = 0;
+		$minus_per_97 = 0;
+		$minus_per_98 = 0;
+	}
+	
+	if($Prow[site] == 28) {	// 수진펫
+		$PRICE_VAL = round($Prow[base_price]+(($Prow[base_price]*(10-$minus_per_28))/100),-2);
+	} else if($Prow[site] == 29) {	// 지원유통
+		$PRICE_VAL = round($Prow[base_price]+(($Prow[base_price]*(19-$minus_per_29))/100),-2);
+	} else if($Prow[site] == 30) {	// 아이편해
+		$PRICE_VAL = round($Prow[base_price]+(($Prow[base_price]*(10-$minus_per_30))/100),-2);
+	} else if($Prow[site] == 31) {	// 트위스트
+		$PRICE_VAL = round($Prow[base_price]+(($Prow[base_price]*(10-$minus_per_31))/100),-2);
+	} else if($Prow[site] == 33) {	// 비투비스포츠
+		$PRICE_VAL = round($Prow[base_price]+(($Prow[base_price]*(10-$minus_per_33))/100),-2);
+	} else if($Prow[site] == 34) {	// 슈가버블
+		$PRICE_VAL = round($Prow[base_price]+(($Prow[base_price]*(10-$minus_per_34))/100),-2);
+	} else if($Prow[site] == 35) {	// 헬로키티
+		$PRICE_VAL = round($Prow[base_price]+(($Prow[base_price]*(20-$minus_per_35))/100),-2);
+	} else if($Prow[site] == 36) {	// BNC
+		$PRICE_VAL = round($Prow[base_price]+(($Prow[base_price]*(10-$minus_per_36))/100),-2);
+	} else if($Prow[site] == 37) {	// 스케이터
+		$PRICE_VAL = round($Prow[base_price]+(($Prow[base_price]*(17-$minus_per_37))/100),-2);
+	} else if($Prow[site] == 38) {	// 아이엠
+		$PRICE_VAL = round($Prow[base_price]+(($Prow[base_price]*(10-$minus_per_38))/100),-2);
+	} else if($Prow[site] == 39) {	// 선우
+		$PRICE_VAL = round($Prow[base_price]+(($Prow[base_price]*(20-$minus_per_39))/100),-2);
+	} else if($Prow[site] == 40) {	// 쥬얼리팬시
+		$PRICE_VAL = round($Prow[base_price]+(($Prow[base_price]*(20-$minus_per_40))/100),-2);
+	} else if($Prow[site] == 41) {	// 진호
+		$PRICE_VAL = round($Prow[base_price]+(($Prow[base_price]*(20-$minus_per_41))/100),-2);
+	} else if($Prow[site] == 42) {	// 거화
+		$PRICE_VAL = round($Prow[base_price]+(($Prow[base_price]*(20-$minus_per_42))/100),-2);
+	} else if($Prow[site] == 97) {	// 코모레비
+		$PRICE_VAL = round($Prow[base_price]+(($Prow[base_price]*(20-$minus_per_97))/100),-2);
+	} else if($Prow[site] == 98) {	// 에프랑
+		$PRICE_VAL = round($Prow[base_price]+(($Prow[base_price]*(20-$minus_per_98))/100),-2);
+	} else {
+		$PRICE_VAL = round($Prow[base_price]+(($Prow[base_price]*(10-$minus_per_28))/100),-2);
+	}
+	$mileage = $Prow[price] / 1000;
+
+	RETURN array($default_price,$PRICE_VAL,$PRICE_RETURN,$mileage);	// 소비자가, 사이트실제판매가, 현금구매할인가, 마일리지
+}
+
+function site_price_return($Pnum,$stat,$OPT_CODE) {
+	GLOBAL $_SERVER, $table, $connect ;
+
+	$Pquery = "SELECT A.base_price, A.price, B.friend_price, A.cate2, A.mileage, A.site, B.special_price, add_fee, chk FROM ".$table[product]." as A, ".$table[product_price]." as B, ".$table[product_biz]." as C WHERE A.seq=B.seq AND B.seq=C.seq AND A.seq='$Pnum'";
+	$Presult = mysql_query($Pquery);
+	$Prow = mysql_fetch_array($Presult);
+	
+	if($OPT_CODE == $Pnum) {
+		$percent_add = 2;	
+	} else {
+		$percent_add = 8;
+	}
+
+	if($Prow[site] == 28) {	// 수진펫
+		$PRICE_VAL = round($Prow[base_price]+(($Prow[base_price]*(10+$percent_add))/100),-2);
+	} else if($Prow[site] == 29) {	// 지원유통
+		$PRICE_VAL = round($Prow[base_price]+(($Prow[base_price]*(23+$percent_add))/100),-2);
+	} else if($Prow[site] == 30) {	// 아이편해
+		$PRICE_VAL = round($Prow[base_price]+(($Prow[base_price]*(10+$percent_add))/100),-2);
+	} else if($Prow[site] == 31) {	// 트위스트
+		$PRICE_VAL = round($Prow[base_price]+(($Prow[base_price]*(10+$percent_add))/100),-2);
+	} else if($Prow[site] == 33) {	// 비투비스포츠
+		$PRICE_VAL = round($Prow[base_price]+(($Prow[base_price]*(10+$percent_add))/100),-2);
+	} else if($Prow[site] == 34) {	// 슈가버블
+		$PRICE_VAL = round($Prow[base_price]+(($Prow[base_price]*(10+$percent_add))/100),-2);
+	} else if($Prow[site] == 97) {	// 코모레비
+		$PRICE_VAL = round($Prow[base_price]+(($Prow[base_price]*(20+$percent_add))/100),-2);
+	} else if($Prow[site] == 23) {	// 눈코입
+		$PRICE_VAL = round($Prow[base_price]+(($Prow[base_price]*(10+$percent_add))/100),-2);
+	} else if($Prow[site] == 13) {	// 아토세이프
+		$PRICE_VAL = round($Prow[base_price]+(($Prow[base_price]*(12+$percent_add))/100),-2);
+	} else if($Prow[site] == 35) {	// 헬로키티
+		$PRICE_VAL = round($Prow[base_price]+(($Prow[base_price]*(15+$percent_add))/100),-2);
+	} else if($Prow[site] == 98) {	// 에프랑
+		$PRICE_VAL = round($Prow[base_price]+(($Prow[base_price]*(15+$percent_add))/100),-2);
+	} else {
+		$PRICE_VAL = round($Prow[base_price]+(($Prow[base_price]*(10+$percent_add))/100),-2);
+	}
+	
+	if($Prow[special_price] > 0) {	// 특가판매
+		$RETURN_PRICE = $Prow[special_price];
+	} else {
+		if($Prow[chk] == 1) {
+			if($Prow[site] == 35 || $Prow[site] == 98) {
+				$RETURN_PRICE = $PRICE_VAL+$Prow[add_fee];
+			} else {
+				$RETURN_PRICE = $Prow[price];
+			}
+		} else {
+			$RETURN_PRICE = $PRICE_VAL+$Prow[add_fee];
+		}
+	}
+	
+	$mileage = $RETURN_PRICE / 1000;
+
+	RETURN array($default_price,$RETURN_PRICE,$RETURN_PRICE,$mileage);	// 소비자가, 사이트실제판매가, 현금구매할인가, 마일리지
+}
+
+function ADMIN_SMS_INFO($S_SEQ){//SMS발송정보 뽑기
+	GLOBAL $table, $connect ;
+
+	$sms_info = mysql_fetch_array(mysql_query("select mobile from ". $table['admin_sms_send'] ." where seq = '". $S_SEQ ."'")) ;
+
+	$admin_mobile = $sms_info["mobile"] ;
+
+    RETURN $admin_mobile ;
+}
+
+
+function Holiday_Info($Month,$Day){//공휴일여부 확인위해..
+	GLOBAL $table, $connect ;
+
+        $Month = (strlen($Month) < 2) ? "0". $Month : $Month ;
+        $Day = (strlen($Day) < 2) ? "0". $Day : $Day ;
+
+	$holiday_info = mysql_num_rows(mysql_query("select * from ". $table['holiday_config'] ." where month = '". $Month ."' AND day = '". $Day ."'" )) ;
+
+	$holiday_cnt = $holiday_info[0] ;
+
+    RETURN $holiday_cnt ;
+}
+
+$HOST_IP = explode(".", $_SERVER["REMOTE_ADDR"]) ;
+
+// IP 막기 : 66.249.64.0 - 66.249.95.255
+
+if ($HOST_IP[0] == 66 AND $HOST_IP[1] == 249 AND ($HOST_IP[2] >= 64 OR $HOST_IP[2] <= 95)) {
+
+	$fp = fopen($DOCUMENT_ROOT ."/weblogs/googleaccess_". date(Y) . date(m) . date(d) ."_log.txt", "a+") ;
+	$ins_data = "----------". date(H) .":". date(i) . ":" . date(s) ."\n" ;
+	$ins_data .= "\$_SERVER[\"REMOTE_ADDR\"]=". $_SERVER["REMOTE_ADDR"] ."\n" ;
+	$ins_data .= "\$_SERVER[\"HTTP_REFERER\"]=". $_SERVER["HTTP_REFERER"] ."\n" ;
+	$ins_data .= "\$_SERVER[\"SCRIPT_NAME\"]=". $_SERVER["SCRIPT_NAME"] ."\n" ;
+	$ins_data .= "\$_SERVER[\"HTTP_USER_AGENT\"]=". $_SERVER["HTTP_USER_AGENT"] ."\n" ;
+	$ins_data .= "\$_SERVER[\"REQUEST_URI\"]=". $_SERVER["REQUEST_URI"] ."\n" ;
+	$ins_data .= "\n" ;
+	fwrite($fp, $ins_data) ;
+	fclose($fp) ;
+
+?>
+<html>
+<head>
+<title>Your access is denied ! </title>
+<script>
+var once = 1;
+var twice = 5;
+function f_selfclose() {
+	once = once + 1;
+	twice = twice - 1	
+	if (once > 5) {
+		location.href = "http://www.joyzen.co.kr" ;
+	}
+
+	timeID = setTimeout("f_selfclose()",1000);
+
+}
+</script>
+</head>
+<body onLoad="f_selfclose();">
+해당 IP는 접근이 차단 되었습니다.<br>
+IP 는 아래와 같은 문제로 차단 될 수 있습니다.<br>
+<li>정상적인 방법으로 접속하지 않은 경우</li><br>
+<li>정상적인 방법으로 여러 차례 접속을 시도한 경우</li><br>
+<li>승인되지 않은 방법으로 해당 페이지에 접근 할 경우</li><br>
+<li>(주)조이젠에서 불량한 IP 라고 판단된 경우</li><br>
+<br>
+위 사항에 해당되지 않는 경우에 본 메세지가 나타나게 되면 아래로 연락해 주시기 바랍니다.<br>
+전화 : 02)717-6244 (주)조이젠<br>
+E-mail : nost9@joyzen.co.kr
+<br>
+<hr>
+<br>
+Your access is denied.<br>
+<br>
+Call back : 82-2-717-6244<br>
+E-mail : nost9@joyzen.co.kr<br>
+</body>
+</html>
+<?
+	exit ;
+}
+
+?>

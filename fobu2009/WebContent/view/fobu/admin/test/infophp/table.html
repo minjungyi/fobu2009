@@ -1,0 +1,208 @@
+<?
+/* 쇼핑몰설정관련 */
+$table[config] = "JT_shop_config";			// 쇼핑몰설정정보
+$table[tax_config] = "JT_shop_tax_config";		// 쇼핑몰세금계산서설정정보
+$table[openmall_config] = "JT_openmall_config";		// 오픈마켓설정정보
+$table[holiday_config] = "holiday_config";		// 공휴일 정보
+$table[sms] = "SC_TRAN";				// SMS정보
+$table[sms_conf] = "JT_sms_conf";			// SMS설정정보
+$table[admin_sms_send] = "JT_admin_smssend";		// 관리자SMS발송정보
+
+/* 카테고리 관련 */
+$table[base_category] = "JT_base_category";		// 기본 카테고리
+$table[parts_category] = "JT_parts_category";		// 부품군 카테고리
+$table[company_category] = "JT_company_category";	// 제조사 카테고리
+$table[product_category] = "JT_product_category";	// 제품정보 카테고리
+$table[detail_category] = "JT_detail_category";		// 상세정보 카테고리
+$table[subdetail_category] = "JT_subdetail_category";	// 소분류정보 카테고리
+$table[base_brand_category] = "JT_base_brand_category";	// 대표브랜드카테고리
+$table[sub_brand_category] = "JT_sub_brand_category";	// 매칭브랜드카테고리
+$table[product_category] = "JT_product_category";	// 제품카테고리
+$table[product_mall_category] = "JT_product_mall_category";	// 오픈마켓용 제품카테고리
+$table[category_sale] = "JT_category_sale";		// 카테고리할인가
+$table[mall_base_category] = "JT_mall_base_category";		// 오픈마켓 기본 카테고리
+$table[mall_parts_category] = "JT_mall_parts_category";		// 오픈마켓1차 카테고리
+$table[mall_detail_category] = "JT_mall_detail_category";	// 오픈마켓 세분류 카테고리
+$table[board_category] = "JT_board_category";		// 고객센터 세부카테고리
+$table[boardbase_category] = "JT_boardbase_category";		// 고객센터 기본카테고리
+
+/* 회원관련 */
+$table[member] = "JT_member";				// 회원주요정보
+$table[member_ext] = "JT_member_ext";			// 회원부가정보
+$table[com_member] = "JT_com_member";			// 딜러회원부가정보
+$table[member_cancel] = "JT_member_cancel";		// 탈퇴회원정보
+$table[mileage] = "JT_mileage";				// 회원마일리지 정보
+$table[mileage_memo] = "JT_mileage_memo";		// 회원마일리지 메모정보
+$table[mailing] = "JT_mailing";				// 회원메일링
+$table[admin_member] = "JT_admin_member";		// 관리자정보
+$table[admin_part] = "JT_admin_part";			// 관리자 부서관련추가정보
+$table[admin_class] = "JT_admin_class";			// 관리자 학력사항추가정보
+$table[admin_family] = "JT_admin_family";		// 관리자 가족추가정보
+$table[admin_move] = "JT_admin_move";			// 관리자 인사이동정보
+$table[admin_mark] = "JT_admin_mark";			// 관리자평점
+$table[memlog] = "JT_admin_log";			// 관리자 로그정보
+$table[zipcode] = "zipcode";				// 우편번호
+$table[birth_chk] = "JT_birth_chk";			// 생일축하메일정보
+
+/* 직원커뮤니티관련 */
+$table[admin_board] = "JT_admin_board2";		// 관리자전용게시판
+$table[inner_board] = "JT_inner_board";			// 내부공지사항
+$table[work] = "JT_work";				// 작업일지
+$table[work_memo] = "JT_work_memo";			// 작업일지 내용
+$table[sinmungo] = "JT_sinmungo";			// 신문고
+$table[prescribe_board] = "JT_prescribe_board";		// 서식게시판
+$table[inner_boardmemo] = "JT_inner_boardmemo";		// 내부공지사항메모
+$table[admin_boardmemo] = "JT_admin_board2memo";	// 관리자전용게시판메모
+$table[admin_absent] = "JT_admin_absent";		// 근태현황게시판
+$table[absent] = "JT_absent";				// 근태관리
+$table[booking] = "JT_booking";				// 일정관리
+$table[pop_board] = "JT_pop_board";			// 팝업공지
+$table[marketing] = "JT_marketing";			// 마케팅연락처
+
+/* 제품관련 */
+$table[product] = "JT_product2";			// 단품정보
+$table[product_body] = "JT_product_body";		// 제품상세설명정보
+$table[product_dc] = "JT_product_dc";			// 단품별 할인율정보
+$table[product_gong] = "JT_product_gong";		// 공동구매정보
+$table[use_article] = "JT_use_article";			// 제품이용후기
+$table[qna_article] = "JT_qna_article";			// 제품Q&A
+$table[del_log] = "JT_del_log";				// 제품삭제로그정보
+$table[product_marks] = "JT_product_marks";		// 제품정보 특이사항
+$table[banner] = "JT_banner";				// 브랜드샵배너
+$table[banner_reg] = "JT_banner_reg";			// 브랜드샵등록
+$table[price_log] = "JT_price_log";			// 협력업체가격관리로그
+$table[zmargin_config] = "JT_zmargin_config";		// 게릴라전 설정정보
+$table[zmargin_detail_config] = "JT_zmargin_detail_config";	// 상품별 설정정보
+$table[mall_gmkprice] = "JT_mall_gmkprice";		// 지마켓최저가정보
+
+/* 신규제품DB관련 */
+// $table[product] = "JT_product2";			// 단품정보
+$table[product_event] = "JT_product_event";		// 이벤트기간 정보
+$table[product_price] = "JT_product_price";		// 외부협력 가격정보
+$table[product_opt] = "JT_product_opt";			// 제품옵션
+$table[product_hit] = "JT_product_hit";			// 제품조회수
+$table[category_hit] = "JT_category_hit";		// 카테고리조회수
+$table[product_biz] = "JT_product_biz";			// 협력업체관련옵션
+$table[product_mix] = "JT_product_mix";			// 패키지제품, 묶음제품정보
+$table[shop_memo] = "JT_shop_memo";			// 대형몰메모
+$table[enuri_code] = "JT_enuri_code";			// 에누리 최저가정보
+$table[empty_chk] = "JT_empty_chk";			// 오픈마켓 중복재고없음 체크
+
+/* 이미지관련 */
+$table[images] = "JT_images";				// 이미지정보
+
+/* 주문관련 */
+$table[carts] = "JT_carts";				// 장바구니정보
+$table[zzim] = "JT_zzim";				// 찜목록정보
+$table[tax] = "JT_tax_renew";				// 세금계산서 정보
+$table[tax_etc] = "JT_tax_etc";				// 세금계산서 부가정보
+$table[tax_company] = "JT_tax_company";			// 세금계산서 사업자정보
+$table[tax_save] = "JT_tax_save";			// 세금계산서 입력정보
+$table[tax_order] = "JT_tax_order";			// 세금계산서 수동출력정보
+$table[cash_tax] = "JT_cash_tax";			// 현금영수증정보
+$table[order_cancel] = "JT_order_cancel";		// 주문삭제정보
+$table[trans_log] = "JT_trans_log";			// 물류주문처리정보
+$table[buy_info] = "JT_buy_info";                         // 구매제품정보
+$table[buy_option] = "JT_buy_option";                     // 구매제품세부정보
+$table[order_info] = "JT_order_info";			// 구매자정보
+$table[order_ext] = "JT_order_ext";			// 배송자및결제정보
+$table[order_option] = "JT_order_option";		// 구매시선택정보
+$table[order_val] = "JT_order_val";			// 구매참고정보
+$table[buy_log] = "JT_buy_log";				// 구매제품처리로그
+$table[add_log] = "JT_add_log";				// 수기매입정보
+$table[return_log] = "JT_return_log";			// 반품로그정보
+$table[send_log] = "JT_send_log";			// 매입건 처리로그정보
+$table["order_ccl_info"] = "JT_order_ccl_info" ;	// 주문취소시 환불계좌 정보
+$table[return_report] = "JT_return_report";		// 반품정보
+$table[md_message] = "JT_md_message";			// MD메시지정보
+$table[orderlog] = "JT_orderlog";			// 주문처리정보
+
+/* 고객센터관련 */
+$table[entry_request] = "JT_entry_request";		// 입점문의정보
+$table[mega_qty] = "JT_mega_qty";			// 대량구매문의
+$table[faq] = "JT_faq";					// FAQ정보
+$table[etc] = "JT_etc";					// 기타컨텐츠
+$table[recruit] = "JT_recruit";				// 채용정보
+
+/* 마이페이지관련 */
+$table[direct_question] = "JT_direct_question";		// 1:1문의정보
+$table[order_as] = "JT_order_as";			// A/S정보
+$table[as_renew] = "JT_as_renew";			// A/S신청정보
+$table[as_product] = "JT_as_product";			// A/S제품신청정보
+$table[counsel_memo_renew] = "JT_counsel_memo_renew";	// A/S처리정보
+
+/* 커뮤니티관련 */
+$table[notice] = "JT_notice";				// 공지사항
+$table[postscript] = "JT_postscript";			// 이용후기
+$table[pds] = "JT_pds";					// 드라이버 자료실
+$table[free] = "JT_free";				// 자유게시판
+$table[evt_freeprize] = "JT_evt_freeprize";		// 공짜 이벤트 당첨자 발표 게시판
+$table[quiz_evt] = "JT_quiz_evt";			// 퀴즈이벤트
+
+/* 협력업체관련 */
+$table[business_member] = "JT_business_member";		// 외부업체 회원정보
+$table[business_notice] = "JT_business_notice";		// 외부업체 공지사항정보
+$table[cooperation_bbs] = "JT_cooperation_bbs";		// 외부업체 통합게시판
+$table[out_company] = "JT_out_company";			// 협력업체
+$table[trans_company] = "JT_trans_company";		// 지정협력업체
+$table[order_company] = "JT_order_company";		// 물류매입대장
+$table[mansang_company] = "JT_mansang_company";		// 만상대장
+$table[dellog] = "JT_trans_dellog";			// MD삭제로그
+$table[price_admin] = "JT_price_admin";			// 협력업체 오픈 카테고리정보
+$table[price_change] = "JT_price_change";		// 제품가격변경로그
+$table[company_name] = "JT_company_name";		// 거래처정보
+$table[cop_member] = "JT_cop_member";			// 업체정보
+
+/* AS관련 */
+$table[as_company] = "JT_as_company";			// AS업체정보
+$table[as_singo] = "JT_as_singo";			// AS정정신고
+$table[as_member] = "JT_as_member";			// 지점정보
+$table[as_info] = "JT_as_info";				// AS등록정보
+$table[happycall] = "JT_happycall";			// 해피콜 등록정보
+
+/* 통계관련 */
+$table[search_stac] = "JT_search_stac";			// 검색어별 통계
+
+// 쿠폰 결재 관련
+$table[product_cpn] = "JT_product_cpn" ;		// 쿠폰 결재 퍼센트 설정
+$table[product_trickprice] = "JT_product_trickprice" ;	// 가격비교 사이트 출력가 설정
+$table[main_shopnews] = "JT_main_shopnews" ;		// 메인 페이지 쇼핑 뉴스~
+
+// CEO 관련
+$table[ceo_estimate] = "JT_ceo_estimate";			// ceo전용 근무평정항목
+$table[ceo_config] = "JT_ceo_config";				// ceo전용 이익금분배
+
+// 결재 관련
+$table["kcp_cyberaccount"] = "JT_kcp_cyberaccount" ;		// KCP 가상계좌 데이타
+
+// 광고 관련
+$table[price_compare] = "JT_price_compare";			// 가격비교유입률통계
+$table[price_compare_product] = "JT_price_compare_product";	// 제품별가격비교유입률통계
+
+// 각종신청
+$table[sms_alert] = "JT_sms_alert";				// 입고제품SMS주문
+
+// 조이젠관련 DB
+$table[dealer_config] = "JT_dealer_config";			// 딜러쿠폰설정값
+
+// 이벤트관련
+$table[event] = "JT_event";					// 이벤트관리
+$table[event_prize] = "JT_event_prize";				// 이벤트명
+$table[event_member] = "JT_event_member";			// 이벤트당첨자
+$table[event_blacklist] = "JT_event_blacklist";			// 이벤트 블랙리스트
+$table[card_payment] = "JT_card_payment";			// 카드할부관리
+
+// 장부 관련
+$table[paycheck_category] = "JT_paycheck_category";		// 급여가감카테고리정보
+$table[paycheck_item] = "JT_paycheck_item";			// 급여항목
+$table[paycheck] = "JT_paycheck";				// 급여대장
+
+// 메뉴권한설정
+$table[topmenu_config] = "JT_topmenu_config";			// 기본메뉴설정
+$table[submenu_config] = "JT_submenu_config";			// 서브메뉴설정
+$table[topmenu_permission] = "JT_topmenu_permission";		// 기본메뉴권한
+$table[submenu_permission] = "JT_submenu_permission";		// 서브메뉴권한
+$table[topmenu_member] = "JT_topmenu_member";			// 기본메뉴관리자별설정
+$table[submenu_member] = "JT_submenu_member";			// 서브메뉴관리자별설정
+$table[open_menu] = "JT_open_menu";				// 1차메뉴고정설정
+?>

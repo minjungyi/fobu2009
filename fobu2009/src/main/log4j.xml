@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<log4j:configuration debug="true" xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+    <appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="[%d][%-5p][%13F:%L] %m%n" />
+        </layout>
+    </appender>
+    
+    <appender name="fobuAppender" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="ImmediateFlush" value="true" />
+        <param name="File" value="/logs/fobuDailyLog.log" />
+        <param name="Append" value="true" />
+        <param name="DatePattern" value="'-'yyyyMMdd" />
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="[%d][%-5p][%13F:%L] %m %n"/>
+        </layout>
+    </appender>
+
+    <!-- ================================================ -->
+    <!-- for logging Apache iBatis -->
+    <!-- ================================================ -->
+    <logger name="java.sql.Connection" additivity="false">
+        <level value="DEBUG" />
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="fobuAppender" />
+    </logger>  
+
+    <logger name="java.sql.PreparedStatement" additivity="false">
+        <level value="DEBUG" />
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="fobuAppender" />
+    </logger>
+
+    <logger name="java.sql.ResultSet" additivity="false">
+        <level value="DEBUG" />
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="fobuAppender" />
+    </logger>
+
+    <root>
+        <level value="INFO" />
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="fobuAppender" />
+    </root>
+
+</log4j:configuration>
